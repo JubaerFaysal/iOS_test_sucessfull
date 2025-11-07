@@ -5,6 +5,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'alarm_screen.dart';
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 
@@ -174,106 +176,6 @@ class _AlarmHomePageState extends State<AlarmHomePage> {
   }
 }
 
-class AlarmRingingPage extends StatelessWidget {
-  final int alarmId;
-  const AlarmRingingPage({super.key, required this.alarmId});
-
-  Future<void> _snooze(int minutes) async {
-    await flutterLocalNotificationsPlugin.cancel(alarmId);
-
-    final snoozeTime =
-    tz.TZDateTime.now(tz.local).add(Duration(minutes: minutes));
-
-    const iosDetails = DarwinNotificationDetails(
-      sound: 'alarm_sound.aiff',
-      presentAlert: true,
-      presentSound: true,
-      presentBadge: true,
-    );
-    const details = NotificationDetails(iOS: iosDetails);
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      alarmId,
-      'Snoozed Alarm',
-      '⏰ Alarm again in $minutes minutes!',
-      snoozeTime,
-      details,
-      payload: 'ALARM_$alarmId',
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-    );
-
-    navigatorKey.currentState?.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const AlarmHomePage()),
-          (route) => false,
-    );
-  }
-
-  Future<void> _dismiss() async {
-    await flutterLocalNotificationsPlugin.cancel(alarmId);
-    navigatorKey.currentState?.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const AlarmHomePage()),
-          (route) => false,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.red.shade50,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.alarm, color: Colors.red, size: 100),
-            const SizedBox(height: 24),
-            const Text(
-              'Alarm Ringing!',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.cancel),
-              label: const Text('Dismiss'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                padding:
-                const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-              ),
-              onPressed: _dismiss,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.snooze),
-              label: const Text('Snooze 5 min'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                padding:
-                const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-              ),
-              onPressed: () => _snooze(5),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.snooze),
-              label: const Text('Snooze 10 min'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber,
-                foregroundColor: Colors.black,
-                padding:
-                const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-              ),
-              onPressed: () => _snooze(10),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class AlarmDatabase {
   static Database? _db;
